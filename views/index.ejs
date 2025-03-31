@@ -8,29 +8,109 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.css" />
     <!-- Leaflet Routing Machine CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <style>
+        :root {
+            --primary-color: #4CAF50;
+            --secondary-color: #2196F3;
+            --text-color: #333;
+            --light-bg: #f9f9f9;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             text-align: center;
             margin: 0;
             padding: 0;
+            background-color: var(--light-bg);
+            color: var(--text-color);
         }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        h2 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+        
         #map {
             height: 500px;
             width: 100%;
             margin: 0;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
         }
+        
         button {
-            padding: 10px 20px;
-            margin: 10px 0;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            margin: 15px 0;
             font-size: 16px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            box-shadow: var(--box-shadow);
+        }
+        
+        button:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+        }
+        
+        button i {
+            margin-right: 8px;
+        }
+        
+        .header-section {
+            background-color: white;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin-bottom: 20px;
+        }
+        
+        .map-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin-bottom: 20px;
+        }
+        
+        .footer {
+            margin-top: 20px;
+            color: #666;
+            font-size: 14px;
         }
     </style>
 </head>
 <body>
-    <h2>Find Nearest EV Charging Station</h2>
-    <button onclick="getUserLocation()">Find My Location</button>
-    <div id="map"></div>
+    <div class="container">
+        <div class="header-section">
+            <h2><i class="fas fa-charging-station"></i> Find Nearest EV Charging Station</h2>
+            <button onclick="getUserLocation()"><i class="fas fa-location-arrow"></i> Find My Location</button>
+        </div>
+        
+        <div class="map-container">
+            <div id="map"></div>
+        </div>
+        
+        <div class="footer">
+            <p>&copy; 2025 EV Charging Station Locator | Powered by OpenStreetMap</p>
+        </div>
+    </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
@@ -125,6 +205,39 @@
                     }
 
                     // Find the nearest station and draw the route
+                    let nearestStation = findNearestStation(userLat, userLon);
+                    if (nearestStation) {
+                        drawRoute(userLat, userLon, nearestStation.latitude, nearestStation.longitude);
+                    }
+                }, (error) => {
+                    console.error("Error getting location:", error);
+                }, {
+                    enableHighAccuracy: true,
+                    maximumAge: 10000,
+                    timeout: 10000
+                });
+            } else {
+                alert("Geolocation is not supported by your browser.");
+            }
+        }
+
+        // Get user location
+        function getUserLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((position) => {
+                    userLat = position.coords.latitude;
+                    userLon = position.coords.longitude;
+
+                    map.setView([userLat, userLon], 14);
+
+                    if (!userMarker) {
+                        userMarker = L.marker([userLat, userLon]).addTo(map)
+                            .bindPopup("You are here")
+                            .openPopup();
+                    } else {
+                        userMarker.setLatLng([userLat, userLon]);
+                    }
+
                     let nearestStation = findNearestStation(userLat, userLon);
                     if (nearestStation) {
                         drawRoute(userLat, userLon, nearestStation.latitude, nearestStation.longitude);
