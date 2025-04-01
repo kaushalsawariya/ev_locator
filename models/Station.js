@@ -3,27 +3,16 @@ const mongoose = require('mongoose');
 const stationSchema = new mongoose.Schema({
     name: {
         type: String,
+        
+    },
+    latitude: {
+        type: Number,
         required: true
     },
-    location: {
-        type: {
-            type: String,
-            enum: ['Point'],
-            required: true
-        },
-        coordinates: {
-            type: [Number],
-            required: true
-        }
-    },
-    address: String,
-    availableChargers: Number,
-    chargingTypes: [String],
-    operatingHours: String,
-    price: String
+    longitude: {
+        type: Number,
+        required: true
+    }
 });
-
-// Create a geospatial index for location-based queries
-stationSchema.index({ location: '2dsphere' });
 
 module.exports = mongoose.model('Station', stationSchema);
